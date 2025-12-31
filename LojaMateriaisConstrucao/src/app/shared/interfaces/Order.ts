@@ -19,3 +19,17 @@ export interface Address {
     zip: string;
     isMain: boolean;
 }
+
+export interface AdminOrder {
+    id: string;
+    customer: {
+        name: string;
+        email: string;
+        avatar: string;
+    };
+    date: string;
+    total: number;
+    paymentStatus: 'Pago' | 'Pendente' | 'Falha' | 'Reembolsado';
+    fulfillmentStatus: 'Não Enviado' | 'Enviado' | 'Entregue' | 'Devolvido';
+    itemsCount: number;
+}

@@ -1,0 +1,171 @@
+ <div class="space-y-6 pb-12">
+    
+    <!-- Header da Página -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <a routerLink="/dashboard-admin" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-colors">
+                <i class="ph-bold ph-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Adicionar Novo Produto</h1>
+                <p class="text-sm text-gray-500">Preencha os dados para criar um item no catálogo.</p>
+            </div>
+        </div>
+        
+        <div class="flex gap-3">
+            <button type="button" routerLink="/dashboard-admin" class="hidden sm:flex px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors shadow-sm">
+                Descartar
+            </button>
+            <button (click)="onSubmit()" [disabled]="isLoading()" class="px-6 py-2.5 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                @if (isLoading()) {
+                    <i class="ph-bold ph-spinner animate-spin"></i> Salvando...
+                } @else {
+                    <i class="ph-bold ph-check"></i> Publicar Produto
+                }
+            </button>
+        </div>
+    </div>
+    
+    <!-- Formulário -->
+    <form [formGroup]="productForm" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Coluna Principal (Esquerda) -->
+        <div class="lg:col-span-2 space-y-8">
+            
+            <!-- Informações Básicas -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Informações Gerais</h2>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome do Produto</label>
+                        <input type="text" formControlName="name" placeholder="Ex: Furadeira de Impacto Bosch" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400">
+                        @if (isFieldInvalid('name')) {
+                            <p class="text-xs text-red-500 mt-1">Nome é obrigatório.</p>
+                        }
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descrição</label>
+                        <textarea formControlName="description" rows="5" placeholder="Descreva as características técnicas, uso recomendado..." 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mídia (Upload) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Imagens do Produto</h2>
+                
+                <!-- Área de Drop -->
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-brand-400 hover:bg-brand-50/30 transition-all cursor-pointer group relative">
+                    <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" (change)="onFileSelected($event)" accept="image/*" multiple>
+                    <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors pointer-events-none">
+                        <i class="ph-bold ph-image text-2xl"></i>
+                    </div>
+                    <p class="text-sm text-gray-600 font-medium pointer-events-none">Clique para carregar ou arraste e solte</p>
+                    <p class="text-xs text-gray-400 mt-1 pointer-events-none">SVG, PNG, JPG ou GIF (max. 800x400px)</p>
+                </div>
+                
+                <!-- Preview das Imagens -->
+                @if (images().length > 0) {
+                    <div class="grid grid-cols-4 gap-4 mt-6">
+                        @for (img of images(); track img; let i = $index) {
+                            <div class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200">
+                                <img [src]="img" class="w-full h-full object-cover">
+                                <button type="button" (click)="removeImage(i)" class="absolute top-1 right-1 bg-white/90 text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50">
+                                    <i class="ph-bold ph-trash"></i>
+                                </button>
+                                @if (i === 0) {
+                                    <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] font-bold text-center py-1 backdrop-blur-sm">Capa</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <!-- Coluna Lateral (Direita) -->
+        <div class="space-y-8">
+            
+            <!-- Organização -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Organização</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Status</label>
+                        <select formControlName="status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none cursor-pointer">
+                            <option value="active">Publicado</option>
+                            <option value="draft">Rascunho</option>
+                            <option value="archived">Arquivado</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Categoria</label>
+                        <select formControlName="category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none cursor-pointer">
+                            <option value="" disabled selected>Selecione...</option>
+                            <option value="ferramentas">Ferramentas</option>
+                            <option value="construcao">Material de Construção</option>
+                            <option value="eletrica">Elétrica</option>
+                            <option value="hidraulica">Hidráulica</option>
+                            <option value="pisos">Pisos e Revestimentos</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Marca</label>
+                        <input type="text" formControlName="brand" placeholder="Ex: Makita" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preço e Estoque -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Preço e Estoque</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Preço Base (R$)</label>
+                        <input type="number" formControlName="price" placeholder="0,00" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none font-medium">
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-1/2">
+                            <label class="block text-xs font-medium text-gray-500 mb-1.5">Preço Promo</label>
+                            <input type="number" formControlName="salePrice" placeholder="0,00" 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none text-red-500 font-medium">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-xs font-medium text-gray-500 mb-1.5">Estoque</label>
+                            <input type="number" formControlName="stock" placeholder="0" 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 pt-2 cursor-pointer">
+                        <input type="checkbox" id="sku-track" class="w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500 cursor-pointer">
+                        <label for="sku-track" class="text-xs text-gray-600 cursor-pointer select-none">Rastrear quantidade de estoque</label>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </form>
+    
+    <!-- Toast Notification -->
+    <div class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 z-50"
+    [class.translate-y-32]="!showToast()"
+    [class.opacity-0]="!showToast()"
+    [class.translate-y-0]="showToast()"
+    [class.opacity-100]="showToast()">
+    <i class="ph-fill ph-check-circle text-green-400 text-lg"></i>
+    <span class="font-medium text-sm">Produto salvo com sucesso!</span>
+</div>
+
+</div>

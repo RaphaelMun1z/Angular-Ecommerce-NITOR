@@ -1,15 +1,25 @@
-import { Component, signal } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardOrder, DashboardStatCard } from '../../shared/interfaces/Dashboard';
+import { DashboardOrder, DashboardStatCard } from '../../../shared/interfaces/Dashboard';
+import { RouterModule } from "@angular/router";
+import { BRAND_CONFIG } from '../../../shared/mocks/BRAND_CONFIG';
 
 @Component({
     selector: 'app-dashboard-admin-page',
-    imports: [CommonModule],
+    imports: [CommonModule, RouterModule],
     templateUrl: './dashboard-admin-page.component.html',
     styleUrl: './dashboard-admin-page.component.css'
 })
 
 export class DashboardAdminPageComponent {
+    config = BRAND_CONFIG;
+    
+    @Input() color: 'dark' | 'light' = 'dark';
+    
+    get fullName(): string {
+        return `${this.config.namePrefix}${this.config.nameSuffix}`;
+    }
+    
     // Estado UI
     isSidebarOpen = signal(false);
     selectedPeriod = signal('Este Mês');

@@ -13,9 +13,14 @@ import { FaqPageComponent } from './pages/faq-page/faq-page.component';
 import { MyFavoriteProductsPageComponent } from './pages/my-favorite-products-page/my-favorite-products-page.component';
 import { AboutUsPageComponent } from './pages/about-us-page/about-us-page.component';
 import { RecoverPasswordPageComponent } from './pages/recover-password-page/recover-password-page.component';
-import { DashboardAdminPageComponent } from './pages/dashboard-admin-page/dashboard-admin-page.component';
+import { DashboardAdminPageComponent } from './pages/admin/dashboard-admin-page/dashboard-admin-page.component';
 import { LayoutWithHeaderComponent } from './pages/layouts/layout-with-header/layout-with-header.component';
 import { NotFoundPageComponent } from './pages/not-found-page/not-found-page.component';
+import { RegisterProductPageComponent } from './pages/admin/register-product-page/register-product-page.component';
+import { RegisterCustomerPageComponent } from './pages/admin/register-customer-page/register-customer-page.component';
+import { AdminOrdersPageComponent } from './pages/admin/admin-orders-page/admin-orders-page.component';
+import { MainPageComponent } from './pages/admin/main-page/main-page.component';
+import { AdministrativeReportsPageComponent } from './pages/admin/administrative-reports-page/administrative-reports-page.component';
 
 export const routes: Routes = [
     {
@@ -60,7 +65,14 @@ export const routes: Routes = [
     // --- Área Administrativa ---
     {
         path: 'dashboard-admin',
-        component: DashboardAdminPageComponent
+        component: DashboardAdminPageComponent,
+        children: [
+            { path: '', component: MainPageComponent },
+            { path: 'registrar-produto', component: RegisterProductPageComponent },
+            { path: 'registrar-cliente', component: RegisterCustomerPageComponent },
+            { path: 'pedidos', component: AdminOrdersPageComponent },
+            { path: 'relatorios-administrativos', component: AdministrativeReportsPageComponent }
+        ]
     },
     
     // Rota coringa
