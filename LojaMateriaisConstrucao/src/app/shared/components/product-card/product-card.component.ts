@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Product } from '../../interfaces/Product';
 import { CommonModule } from '@angular/common';
+import { ProductFullDetails } from '../../interfaces/Product';
 
 @Component({
     selector: 'app-product-card',
@@ -10,10 +10,10 @@ import { CommonModule } from '@angular/common';
 })
 
 export class ProductCardComponent {
-    @Input({ required: true }) product!: Product;
+    @Input({ required: true }) product!: ProductFullDetails;
     @Input() viewMode: 'grid' | 'list' = 'grid';
     
-    @Output() addToCart = new EventEmitter<Product>();
+    @Output() addToCart = new EventEmitter<ProductFullDetails>();
     @Output() showQuickView = new EventEmitter<MouseEvent>();
     @Output() hideQuickView = new EventEmitter<void>();
     

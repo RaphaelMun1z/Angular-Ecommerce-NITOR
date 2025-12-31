@@ -1,6 +1,6 @@
-import { Product } from "../interfaces/Product";
+import { ProductFullDetails } from "../interfaces/Product";
 
-export const MOCK_PRODUCTS: Product[] = [
+export const MOCK_PRODUCTS: ProductFullDetails[] = [
     {
         id: 1,
         name: 'Cimento CP II-E-32 50kg Votorantim',

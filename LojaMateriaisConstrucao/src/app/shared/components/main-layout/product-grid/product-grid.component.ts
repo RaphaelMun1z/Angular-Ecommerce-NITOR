@@ -1,9 +1,9 @@
 import { Component, inject, Input } from '@angular/core';
 import { ProductCardComponent } from "../../product-card/product-card.component";
 import { ToastrService } from 'ngx-toastr';
-import { Product } from '../../../interfaces/Product';
 import { CommonModule } from '@angular/common';
 import { MOCK_PRODUCTS } from '../../../mocks/MOCK_PRODUCTS';
+import { ProductFullDetails } from '../../../interfaces/Product';
 
 @Component({
     selector: 'app-product-grid',
@@ -15,10 +15,10 @@ import { MOCK_PRODUCTS } from '../../../mocks/MOCK_PRODUCTS';
 export class ProductGridComponent {
     private toastr = inject(ToastrService);
     
-    @Input() products: Product[] = MOCK_PRODUCTS;
+    @Input() products: ProductFullDetails[] = MOCK_PRODUCTS;
     @Input() viewMode: 'grid' | 'list' = 'grid';
     
-    handleAddToCart(product: Product) {
+    handleAddToCart(product: ProductFullDetails) {
         if (!product.inStock) {
             this.toastr.error('Produto indisponível no momento.', 'Ops!');
             return;
@@ -28,7 +28,7 @@ export class ProductGridComponent {
         console.log('Produto adicionado ao carrinho:', product);
     }
     
-    openPopup(event: MouseEvent, product: Product) {
+    openPopup(event: MouseEvent, product: ProductFullDetails) {
         console.log('Abrir Quick View para:', product.id, 'em', event.clientX, event.clientY);
     }
     

@@ -3,8 +3,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { Product } from '../../shared/interfaces/Product';
 import { MOCK_PRODUCTS } from '../../shared/mocks/MOCK_PRODUCTS';
+import { ProductFullDetails } from '../../shared/interfaces/Product';
 
 @Component({
     selector: 'app-product-page',
@@ -18,7 +18,7 @@ export class ProductPageComponent implements OnInit {
     private toastr = inject(ToastrService);
     // private cartService = inject(CartService);
     
-    product: Product | undefined;
+    product: ProductFullDetails | undefined;
     currentImage: string = '';
     activeTab: 'overview' | 'specs' | 'reviews' = 'overview';
     quantity: number = 1;
