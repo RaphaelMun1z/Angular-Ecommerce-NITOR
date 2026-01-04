@@ -12,7 +12,13 @@
         
         <app-grid-header></app-grid-header>
         
-        <app-product-grid></app-product-grid>
+        <div class="container mx-auto p-6">
+            @if (loading()) {
+                <p>Carregando produtos...</p>
+            } @else {
+                <app-product-grid [products]="produtos()"></app-product-grid>
+            }
+        </div>
         
         <app-empty-state></app-empty-state>
         

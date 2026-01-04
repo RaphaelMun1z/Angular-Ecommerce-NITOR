@@ -21,6 +21,7 @@ export interface TokenResponse {
 }
 
 export interface User {
+    id: string;
     email: string;
     sub?: string;
     roles?: string[];

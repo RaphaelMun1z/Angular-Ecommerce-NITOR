@@ -1,36 +1,64 @@
-import { Component, inject, Input } from '@angular/core';
-import { ProductCardComponent } from "../../product-card/product-card.component";
-import { ToastrService } from 'ngx-toastr';
+import { Component, inject, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MOCK_PRODUCTS } from '../../../mocks/MOCK_PRODUCTS';
-import { ProductFullDetails } from '../../../interfaces/Product';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
+import { ProductCardComponent } from "../../product-card/product-card.component";
+import { AuthService } from '../../../../core/auth/auth.service';
+import { CarrinhoService } from '../../../../services/carrinho.service';
+import { Produto } from '../../../../models/catalogo.models';
 
 @Component({
     selector: 'app-product-grid',
+    standalone: true,
     imports: [CommonModule, ProductCardComponent],
     templateUrl: './product-grid.component.html',
     styleUrl: './product-grid.component.css'
 })
-
 export class ProductGridComponent {
     private toastr = inject(ToastrService);
+    private carrinhoService = inject(CarrinhoService);
+    private authService = inject(AuthService);
+    private router = inject(Router);
     
-    @Input() products: ProductFullDetails[] = MOCK_PRODUCTS;
+    @Input() products: Produto[] = []; 
     @Input() viewMode: 'grid' | 'list' = 'grid';
     
-    handleAddToCart(product: ProductFullDetails) {
-        if (!product.inStock) {
+    selectedProduct = signal<Produto | null>(null);
+    
+    handleAddToCart(product: Produto) {
+        if (product.estoque <= 0) {
             this.toastr.error('Produto indisponível no momento.', 'Ops!');
             return;
         }
         
-        this.toastr.success(`${product.name} adicionado!`, 'Carrinho');
-        console.log('Produto adicionado ao carrinho:', product);
+        if (!this.authService.isAuthenticated()) {
+            this.toastr.info('Faça login para adicionar ao carrinho.', 'Atenção');
+            this.router.navigate(['/login']);
+            return;
+        }
+        
+        const user = this.authService.currentUser();
+        const clienteId = user?.id; 
+        
+        if (!clienteId) return; 
+        
+        this.carrinhoService.adicionarItem(clienteId, product.id).subscribe({
+            next: () => {
+                this.toastr.success(`${product.titulo} adicionado!`, 'Carrinho');
+            },
+            error: (err) => {
+                this.toastr.error('Erro ao adicionar produto.', 'Erro');
+                console.error(err);
+            }
+        });
     }
     
-    openPopup(event: MouseEvent, product: ProductFullDetails) {
+    openPopup(product: Produto) {
+        this.selectedProduct.set(product);
     }
     
     closePopup() {
+        this.selectedProduct.set(null);
     }
 }

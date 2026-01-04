@@ -110,11 +110,11 @@ export class AuthService {
             const payload = this.parseJwt(token);
             
             const user: User = {
+                id: payload.id,
                 email: payload.sub,
-                // Garante que roles seja sempre um array, mesmo que venha vazio
                 roles: Array.isArray(payload.roles) ? payload.roles : [] 
             };
-            console.log(user)
+            
             this._currentUser.set(user);
         } catch (e) {
             console.error('Erro ao decodificar token', e);

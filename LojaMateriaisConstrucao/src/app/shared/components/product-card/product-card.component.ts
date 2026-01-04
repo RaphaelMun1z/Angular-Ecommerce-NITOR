@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductFullDetails } from '../../interfaces/Product';
+import { Produto } from '../../../models/catalogo.models';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-product-card',
@@ -10,55 +11,21 @@ import { ProductFullDetails } from '../../interfaces/Product';
 })
 
 export class ProductCardComponent {
-    @Input({ required: true }) product!: ProductFullDetails;
+    private router = inject(Router);
+    
+    @Input({ required: true }) product!: Produto;
     @Input() viewMode: 'grid' | 'list' = 'grid';
     
-    @Output() addToCart = new EventEmitter<ProductFullDetails>();
-    @Output() showQuickView = new EventEmitter<MouseEvent>();
-    @Output() hideQuickView = new EventEmitter<void>();
-    
-    get installmentValue(): string {
-        return (this.product.price / 10).toFixed(2).replace('.', ',');
-    }
-    
-    get hasDiscount(): boolean {
-        return (this.product.discount || 0) > 0;
-    }
-    
-    get oldPrice(): string | null {
-        if (!this.hasDiscount) return null;
-        return (this.product.price * (1 + (this.product.discount || 0) / 100))
-        .toFixed(2)
-        .replace('.', ',');
-    }
-    
-    get formattedPrice(): string {
-        return this.product.price.toFixed(2).replace('.', ',');
-    }
-    
-    get isLowStock(): boolean {
-        return this.product.inStock && (this.product.stockCount || 0) < 5;
-    }
-    
-    get stars(): number[] {
-        const totalStars = 5;
-        const filledStars = Math.round(this.product.rating);
-        return Array(totalStars).fill(0).map((_, i) => i < filledStars ? 1 : 0);
-    }
-    
-    // Ações
+    @Output() addToCart = new EventEmitter<Produto>();
+        
     onAddToCart(event: Event): void {
         event.stopPropagation();
-        if (this.product.inStock) {
+        if (this.product.estoque > 0) {
             this.addToCart.emit(this.product);
         }
     }
     
-    onMouseEnter(event: MouseEvent): void {
-        this.showQuickView.emit(event);
-    }
-    
-    onMouseLeave(): void {
-        this.hideQuickView.emit();
+    onCardClick(): void {
+        this.router.navigate(['/produto', this.product.id]);
     }
 }

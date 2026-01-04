@@ -23,6 +23,7 @@ import { MainPageComponent } from './pages/admin/main-page/main-page.component';
 import { AdministrativeReportsPageComponent } from './pages/admin/administrative-reports-page/administrative-reports-page.component';
 import { adminGuard, authGuard } from './core/guards/auth.guard';
 import { ForbiddenPageComponent } from './pages/forbidden-page/forbidden-page.component';
+import { MyOrdersPageComponent } from './pages/my-orders-page/my-orders-page.component';
 
 export const routes: Routes = [
     {
@@ -49,6 +50,11 @@ export const routes: Routes = [
                 path: 'finalizar-compra', 
                 component: FinalizePurchasePageComponent,
                 canActivate: [authGuard] 
+            },
+            { 
+                path: 'meus-pedidos', 
+                component: MyOrdersPageComponent, 
+                canActivate: [authGuard]
             },
             { 
                 path: 'pedido/:id', 
