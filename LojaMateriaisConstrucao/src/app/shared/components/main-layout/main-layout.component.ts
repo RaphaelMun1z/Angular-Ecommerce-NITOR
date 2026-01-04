@@ -7,6 +7,7 @@ import { EmptyStateComponent } from "./empty-state/empty-state.component";
 import { Produto, ProdutoFiltro } from '../../../models/catalogo.models';
 import { CatalogoService } from '../../../services/catalogo.service';
 import { PageableParams } from '../../../models/shared.models';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'app-main-layout',
@@ -17,22 +18,56 @@ import { PageableParams } from '../../../models/shared.models';
 
 export class MainLayoutComponent implements OnInit {
     private catalogoService = inject(CatalogoService);
+    private route = inject(ActivatedRoute);
     
     // Dados
     produtos = signal<Produto[]>([]);
-    totalItems = signal(0); // Garante que comece com 0
+    totalItems = signal(0);
     loading = signal(true);
     
     // Estado Visual
     isMobileFilterOpen = signal(false);
-    viewMode = signal<'grid' | 'list'>('grid'); // O estado principal da visualização fica aqui
+    viewMode = signal<'grid' | 'list'>('grid');
     
     // Estado da Busca
     currentSort = signal(''); 
     currentFilter = signal<ProdutoFiltro | null>(null);
     
     ngOnInit() {
-        this.carregarDados();
+        // Escuta mudanças na URL de forma reativa
+        this.route.queryParams.subscribe(params => {
+            const termo = params['termo'];
+            const filtroLocal = this.currentFilter();
+            
+            if (termo) {
+                // 1. Caso haja termo na URL: Atualiza ou cria o filtro mantendo o termo
+                this.currentFilter.set({
+                    ...(filtroLocal || {
+                        apenasAtivos: true
+                    }),
+                    termo: termo,
+                    precoMin: 0,
+                    precoMax: 10000
+                });
+                this.carregarDados();
+            } else {
+                // 2. Caso NÃO haja termo na URL:
+                // Se existia um termo no filtro local, precisamos removê-lo para resetar a busca
+                if (filtroLocal?.termo) {
+                    const novoFiltro = { ...filtroLocal };
+                    delete novoFiltro.termo;
+                    
+                    // Se após remover o termo, o filtro for o padrão (preços originais), podemos deixar null
+                    // ou manter apenas os filtros de preço da sidebar.
+                    this.currentFilter.set(novoFiltro);
+                    this.carregarDados();
+                } 
+                // Se é o carregamento inicial da página (sem termo e sem produtos carregados)
+                else if (this.produtos().length === 0) {
+                    this.carregarDados();
+                }
+            }
+        });
     }
     
     carregarDados() {
@@ -44,6 +79,7 @@ export class MainLayoutComponent implements OnInit {
             sort: this.currentSort() 
         };
         
+        // Decide qual endpoint chamar
         const requisicao$ = this.currentFilter() 
         ? this.catalogoService.buscarProdutosComFiltro(this.currentFilter()!, pageParams)
         : this.catalogoService.listarProdutosVitrine(pageParams);
@@ -51,7 +87,6 @@ export class MainLayoutComponent implements OnInit {
         requisicao$.subscribe({
             next: (page) => {
                 this.produtos.set(page.content);
-                // Atualiza o total com base no retorno do backend (totalElements é padrão do Spring Page)
                 this.totalItems.set(page.totalElements ?? 0);
                 this.loading.set(false);
             },
@@ -65,6 +100,12 @@ export class MainLayoutComponent implements OnInit {
     }
     
     aplicarFiltros(filtro: ProdutoFiltro) {
+        // Ao aplicar filtros da sidebar, preservamos o termo de busca que está na URL se ele existir
+        const termoUrl = this.route.snapshot.queryParams['termo'];
+        if (termoUrl) {
+            filtro.termo = termoUrl;
+        }
+        
         this.currentFilter.set(filtro);
         this.isMobileFilterOpen.set(false);
         this.carregarDados();
@@ -75,7 +116,6 @@ export class MainLayoutComponent implements OnInit {
         this.carregarDados();
     }
     
-    // Este método é chamado quando o componente GridHeader emite o evento de troca
     alterarVisualizacao(mode: 'grid' | 'list') {
         this.viewMode.set(mode);
     }
