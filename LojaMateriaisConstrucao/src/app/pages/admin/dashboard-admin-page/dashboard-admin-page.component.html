@@ -27,11 +27,27 @@
                 Dashboard
             </a>
             
-            <a routerLink="/dashboard-admin/pedidos" 
-               routerLinkActive="bg-brand-50 text-brand-700 font-bold" 
-               class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-colors group">
-                <i class="ph-bold ph-shopping-bag text-lg text-gray-400 group-hover:text-brand-600 transition-colors"></i>
-                Pedidos
+           <a routerLink="/dashboard-admin/pedidos" 
+               routerLinkActive="bg-brand-50 text-brand-700 font-bold shadow-xs" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-500 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                <i class="ph-bold ph-shopping-bag text-lg"></i>
+                <span>Pedidos</span>
+            </a>
+
+            <!-- Produtos (Listagem) -->
+            <a routerLink="/dashboard-admin/produtos" 
+               routerLinkActive="bg-brand-50 text-brand-700 font-bold shadow-xs" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-500 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                <i class="ph-bold ph-package text-lg"></i>
+                <span>Produtos</span>
+            </a>
+
+            <!-- Clientes (Listagem) -->
+            <a routerLink="/dashboard-admin/clientes" 
+               routerLinkActive="bg-brand-50 text-brand-700 font-bold shadow-xs" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-500 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                <i class="ph-bold ph-users text-lg"></i>
+                <span>Clientes</span>
             </a>
             
             <a routerLink="/dashboard-admin/registrar-cliente" 

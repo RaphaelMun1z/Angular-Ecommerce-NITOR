@@ -26,6 +26,8 @@ import { MyPersonalDataComponent } from './shared/components/profile/my-personal
 import { MyAddressesComponent } from './shared/components/profile/my-addresses/my-addresses.component';
 import { MyFavoriteProductsComponent } from './shared/components/profile/my-favorite-products/my-favorite-products.component';
 import { MyOrdersComponent } from './shared/components/profile/my-orders/my-orders.component';
+import { AdminProductsPageComponent } from './pages/admin/admin-products-page/admin-products-page.component';
+import { AdminCustomersPageComponent } from './pages/admin/admin-customers-page/admin-customers-page.component';
 
 export const routes: Routes = [
     {
@@ -86,6 +88,8 @@ export const routes: Routes = [
             { path: 'registrar-product', component: RegisterProductPageComponent },
             { path: 'registrar-cliente', component: RegisterCustomerPageComponent },
             { path: 'pedidos', component: AdminOrdersPageComponent },
+            { path: 'produtos', component: AdminProductsPageComponent },
+            { path: 'clientes', component: AdminCustomersPageComponent },
             { path: 'relatorios-administrativos', component: AdministrativeReportsPageComponent }
         ]
     },

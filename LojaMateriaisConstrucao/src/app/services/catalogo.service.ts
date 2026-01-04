@@ -12,26 +12,25 @@ export class CatalogoService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}`;
     
-    // --- ESTADO (Signals) ---
-    // Podemos manter cache de categorias, já que mudam pouco
-    private _categorias = signal<Categoria[]>([]);
-    public categorias = this._categorias.asReadonly();
+    // --- PRODUTOS ---
     
-    // --- AÇÕES ---
-    
-    // Produtos
     listarProdutosVitrine(pageable?: PageableParams): Observable<Page<Produto>> {
         let params = this.buildPageParams(pageable);
         return this.http.get<Page<Produto>>(`${this.apiUrl}/produtos/vitrine`, { params });
     }
     
+    // Admin: Listar todos (ativos e inativos)
+    listarTodosProdutosAdmin(pageable?: PageableParams): Observable<Page<Produto>> {
+        let params = this.buildPageParams(pageable);
+        return this.http.get<Page<Produto>>(`${this.apiUrl}/produtos`, { params });
+    }
+    
     buscarProdutosComFiltro(filtro: ProdutoFiltro, pageable?: PageableParams): Observable<Page<Produto>> {
         let params = this.buildPageParams(pageable);
-        
         if (filtro.termo) params = params.set('termo', filtro.termo);
         if (filtro.categoriaId) params = params.set('categoriaId', filtro.categoriaId);
-        if (filtro.precoMin) params = params.set('precoMin', filtro.precoMin.toString());
-        if (filtro.precoMax) params = params.set('precoMax', filtro.precoMax.toString());
+        if (filtro.precoMin !== undefined) params = params.set('precoMin', filtro.precoMin.toString());
+        if (filtro.precoMax !== undefined) params = params.set('precoMax', filtro.precoMax.toString());
         if (filtro.apenasAtivos !== undefined) params = params.set('apenasAtivos', filtro.apenasAtivos);
         
         return this.http.get<Page<Produto>>(`${this.apiUrl}/produtos/buscar`, { params });
@@ -41,7 +40,6 @@ export class CatalogoService {
         return this.http.get<Produto>(`${this.apiUrl}/produtos/${id}`);
     }
     
-    // Admin: Criar/Editar Produto
     salvarProduto(produto: ProdutoRequest): Observable<Produto> {
         return this.http.post<Produto>(`${this.apiUrl}/produtos`, produto);
     }
@@ -50,22 +48,25 @@ export class CatalogoService {
         return this.http.put<Produto>(`${this.apiUrl}/produtos/${id}`, produto);
     }
     
-    // Categorias
-    carregarCategoriasAtivas() {
-        this.listarCategoriasAtivas().subscribe(page => this._categorias.set(page.content));
+    excluirProduto(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/produtos/${id}`);
     }
+    
+    ativarProduto(id: string): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/produtos/${id}/ativar`, {});
+    }
+    
+    desativarProduto(id: string): Observable<void> {
+        return this.http.patch<void>(`${this.apiUrl}/produtos/${id}/desativar`, {});
+    }
+    
+    // --- CATEGORIAS ---
     
     listarCategoriasAtivas(pageable?: PageableParams): Observable<Page<Categoria>> {
         const params = this.buildPageParams(pageable);
         return this.http.get<Page<Categoria>>(`${this.apiUrl}/categorias/ativas`, { params });
     }
     
-    listarTodasCategoriasAdmin(pageable?: PageableParams): Observable<Page<Categoria>> {
-        const params = this.buildPageParams(pageable);
-        return this.http.get<Page<Categoria>>(`${this.apiUrl}/categorias`, { params });
-    }
-    
-    // Utils
     private buildPageParams(pageable?: PageableParams): HttpParams {
         let params = new HttpParams();
         if (pageable) {
