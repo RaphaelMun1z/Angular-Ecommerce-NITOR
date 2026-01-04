@@ -1,4 +1,4 @@
- <div class="space-y-6 pb-12">
+<div class="space-y-6 pb-12 animate-fade-in">
     
     <!-- Header da Página -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -8,15 +8,15 @@
             </a>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Adicionar Novo Produto</h1>
-                <p class="text-sm text-gray-500">Preencha os dados para criar um item no catálogo.</p>
+                <p class="text-sm text-gray-500">Cadastre um novo item no seu catálogo de vendas.</p>
             </div>
         </div>
         
         <div class="flex gap-3">
-            <button type="button" routerLink="/dashboard-admin" class="hidden sm:flex px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors shadow-sm">
+            <button type="button" routerLink="/dashboard-admin" class="hidden sm:flex px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition-colors shadow-sm cursor-pointer">
                 Descartar
             </button>
-            <button (click)="onSubmit()" [disabled]="isLoading()" class="px-6 py-2.5 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+            <button (click)="onSubmit()" [disabled]="isLoading()" class="px-6 py-2.5 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg shadow-brand-500/20 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
                 @if (isLoading()) {
                     <i class="ph-bold ph-spinner animate-spin"></i> Salvando...
                 } @else {
@@ -38,47 +38,47 @@
                 
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome do Produto</label>
-                        <input type="text" formControlName="name" placeholder="Ex: Furadeira de Impacto Bosch" 
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Título do Produto</label>
+                        <input type="text" formControlName="titulo" placeholder="Ex: Furadeira de Impacto Bosch" 
                         class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400">
-                        @if (isFieldInvalid('name')) {
-                            <p class="text-xs text-red-500 mt-1">Nome é obrigatório.</p>
+                        @if (isFieldInvalid('titulo')) {
+                            <p class="text-[10px] text-red-500 mt-1 font-bold">Título é obrigatório (mín. 3 letras).</p>
                         }
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descrição</label>
-                        <textarea formControlName="description" rows="5" placeholder="Descreva as características técnicas, uso recomendado..." 
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descrição Detalhada</label>
+                        <textarea formControlName="descricao" rows="5" placeholder="Descreva as características técnicas, uso recomendado e diferenciais do produto..." 
                         class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400 resize-none"></textarea>
+                        @if (isFieldInvalid('descricao')) {
+                            <p class="text-[10px] text-red-500 mt-1 font-bold">Descrição é obrigatória.</p>
+                        }
                     </div>
                 </div>
             </div>
             
-            <!-- Mídia (Upload) -->
+            <!-- Mídia -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h2 class="text-lg font-bold text-gray-900 mb-6">Imagens do Produto</h2>
-                
-                <!-- Área de Drop -->
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-brand-400 hover:bg-brand-50/30 transition-all cursor-pointer group relative">
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Galeria de Fotos</h2>
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-brand-400 hover:bg-brand-50/30 transition-all cursor-pointer group relative">
                     <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" (change)="onFileSelected($event)" accept="image/*" multiple>
-                    <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors pointer-events-none">
+                    <div class="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors">
                         <i class="ph-bold ph-image text-2xl"></i>
                     </div>
-                    <p class="text-sm text-gray-600 font-medium pointer-events-none">Clique para carregar ou arraste e solte</p>
-                    <p class="text-xs text-gray-400 mt-1 pointer-events-none">SVG, PNG, JPG ou GIF (max. 800x400px)</p>
+                    <p class="text-sm text-gray-600 font-medium">Clique para carregar ou arraste fotos do produto</p>
+                    <p class="text-xs text-gray-400 mt-1">Imagens quadradas (1:1) funcionam melhor.</p>
                 </div>
                 
-                <!-- Preview das Imagens -->
                 @if (images().length > 0) {
                     <div class="grid grid-cols-4 gap-4 mt-6">
                         @for (img of images(); track img; let i = $index) {
-                            <div class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200">
+                            <div class="relative group aspect-square rounded-xl overflow-hidden border border-gray-100 shadow-sm">
                                 <img [src]="img" class="w-full h-full object-cover">
-                                <button type="button" (click)="removeImage(i)" class="absolute top-1 right-1 bg-white/90 text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50">
+                                <button type="button" (click)="removeImage(i)" class="absolute top-1.5 right-1.5 bg-white/90 text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50 cursor-pointer">
                                     <i class="ph-bold ph-trash"></i>
                                 </button>
                                 @if (i === 0) {
-                                    <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] font-bold text-center py-1 backdrop-blur-sm">Capa</span>
+                                    <span class="absolute bottom-0 left-0 right-0 bg-brand-600 text-white text-[10px] font-bold text-center py-1">Principal</span>
                                 }
                             </div>
                         }
@@ -92,80 +92,83 @@
             
             <!-- Organização -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Organização</h2>
+                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Categorização</h2>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Status</label>
-                        <select formControlName="status" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none cursor-pointer">
-                            <option value="active">Publicado</option>
-                            <option value="draft">Rascunho</option>
-                            <option value="archived">Arquivado</option>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Código de Controle (SKU)</label>
+                        <input type="text" formControlName="codigoControle" placeholder="Ex: FER-001-BOSCH" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Categoria</label>
+                        <select formControlName="categoriaId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none cursor-pointer">
+                            <option value="" disabled>Selecione uma categoria...</option>
+                            @for (cat of categorias(); track cat.id) {
+                                <option [value]="cat.id">{{ cat.nome }}</option>
+                            }
                         </select>
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Categoria</label>
-                        <select formControlName="category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none cursor-pointer">
-                            <option value="" disabled selected>Selecione...</option>
-                            <option value="ferramentas">Ferramentas</option>
-                            <option value="construcao">Material de Construção</option>
-                            <option value="eletrica">Elétrica</option>
-                            <option value="hidraulica">Hidráulica</option>
-                            <option value="pisos">Pisos e Revestimentos</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Marca</label>
-                        <input type="text" formControlName="brand" placeholder="Ex: Makita" 
-                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Status de Exibição</label>
+                        <div class="flex p-1 bg-gray-100 rounded-xl">
+                            <button type="button" (click)="productForm.get('ativo')?.setValue(true)" 
+                                    [class]="productForm.get('ativo')?.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'"
+                                    class="flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer">Ativo</button>
+                            <button type="button" (click)="productForm.get('ativo')?.setValue(false)" 
+                                    [class]="!productForm.get('ativo')?.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'"
+                                    class="flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer">Inativo</button>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Preço e Estoque -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Preço e Estoque</h2>
+                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Valores e Inventário</h2>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1.5">Preço Base (R$)</label>
-                        <input type="number" formControlName="price" placeholder="0,00" 
-                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none font-medium">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Preço Base (R$)</label>
+                        <input type="number" formControlName="preco" placeholder="0,00" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none font-bold">
                     </div>
                     
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Preço Promocional (Opcional)</label>
+                        <input type="number" formControlName="precoPromocional" placeholder="0,00" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none text-brand-600 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Quantidade em Estoque</label>
+                        <input type="number" formControlName="estoque" placeholder="0" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dados Técnicos -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">Especificações</h2>
+                <div class="space-y-4">
                     <div class="flex gap-4">
-                        <div class="w-1/2">
-                            <label class="block text-xs font-medium text-gray-500 mb-1.5">Preço Promo</label>
-                            <input type="number" formControlName="salePrice" placeholder="0,00" 
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none text-red-500 font-medium">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Peso (Kg)</label>
+                            <input type="number" formControlName="pesoKg" step="0.1" placeholder="0.0" 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 outline-none">
                         </div>
-                        <div class="w-1/2">
-                            <label class="block text-xs font-medium text-gray-500 mb-1.5">Estoque</label>
-                            <input type="number" formControlName="stock" placeholder="0" 
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 focus:border-brand-500 outline-none">
+                        <div class="flex-[2]">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5">Dimensões</label>
+                            <input type="text" formControlName="dimensoes" placeholder="ex: 10x20x15" 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-100 outline-none">
                         </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 pt-2 cursor-pointer">
-                        <input type="checkbox" id="sku-track" class="w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500 cursor-pointer">
-                        <label for="sku-track" class="text-xs text-gray-600 cursor-pointer select-none">Rastrear quantidade de estoque</label>
                     </div>
                 </div>
             </div>
             
         </div>
     </form>
-    
-    <!-- Toast Notification -->
-    <div class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 z-50"
-    [class.translate-y-32]="!showToast()"
-    [class.opacity-0]="!showToast()"
-    [class.translate-y-0]="showToast()"
-    [class.opacity-100]="showToast()">
-    <i class="ph-fill ph-check-circle text-green-400 text-lg"></i>
-    <span class="font-medium text-sm">Produto salvo com sucesso!</span>
-</div>
-
 </div>

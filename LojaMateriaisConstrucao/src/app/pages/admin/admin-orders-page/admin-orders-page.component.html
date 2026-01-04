@@ -1,141 +1,162 @@
-<div class="space-y-6">
+<div class="space-y-8 animate-fade-in pb-10 max-w-[1600px] mx-auto">
     
-    <!-- Header da Página (Título e Ações) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <!-- Cabeçalho Simplificado -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Pedidos</h1>
-            <p class="text-sm text-gray-500">Gerencie e acompanhe o status de todas as vendas.</p>
-        </div>
-        <div class="flex gap-3">
-            <button class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
-                <i class="ph-bold ph-download-simple"></i> Exportar
-            </button>
-            <button class="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white text-sm font-bold rounded-xl hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/20">
-                <i class="ph-bold ph-plus"></i> Criar Pedido
-            </button>
-        </div>
-    </div>
-    
-    <!-- Filtros e Busca Local -->
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
-        
-        <!-- Busca na Tabela -->
-        <div class="relative w-full md:w-96">
-            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input type="text" 
-            [(ngModel)]="searchTerm"
-            placeholder="Buscar por ID, cliente ou email..." 
-            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-transparent focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 rounded-xl text-sm outline-none transition-all">
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Pedidos</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Gestão de vendas e logística</p>
         </div>
         
-        <!-- Filtros de Status -->
-        <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-            <button (click)="setFilter('all')" 
-            [class]="activeFilter() === 'all' ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-            Todos
-        </button>
-        <button (click)="setFilter('pago')" 
-        [class]="activeFilter() === 'pago' ? 'bg-green-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'"
-        class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-        Pagos
-    </button>
-    <button (click)="setFilter('pendente')" 
-    [class]="activeFilter() === 'pendente' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'"
-    class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-    Pendentes
-</button>
-</div>
-</div>
-
-<!-- Tabela de Pedidos -->
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-50/50 text-xs text-gray-400 uppercase tracking-wider border-b border-gray-100 font-bold">
-                    <th class="px-6 py-4">Pedido</th>
-                    <th class="px-6 py-4">Data</th>
-                    <th class="px-6 py-4">Cliente</th>
-                    <th class="px-6 py-4">Pagamento</th>
-                    <th class="px-6 py-4 text-center">Entrega</th> <!-- Centralizei para alinhar melhor o badge -->
-                    <th class="px-6 py-4 text-right">Total</th>
-                    <th class="px-6 py-4 text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody class="text-sm divide-y divide-gray-50">
-                @for (order of filteredOrders(); track order.id) {
-                    <tr class="hover:bg-gray-50 transition-colors group">
-                        <td class="px-6 py-4 font-bold text-gray-900">
-                            <a href="#" class="hover:text-brand-600 transition-colors">#{{ order.id }}</a>
-                        </td>
-                        <td class="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">{{ order.date }}</td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-gray-100 overflow-hidden shrink-0">
-                                    <img [src]="order.avatar" class="w-full h-full object-cover">
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-900 leading-none">{{ order.customer }}</span>
-                                    <span class="text-xs text-gray-400 mt-1">{{ order.email }}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span [class]="getPaymentBadgeClass(order.status) + ' px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border inline-block min-w-17.5 text-center'">
-                                {{ order.status === 'Concluído' ? 'Pago' : order.status }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <!-- Simulando status de entrega baseado no status do pedido para o exemplo -->
-                            <span [class]="getFulfillmentBadgeClass(order.status) + ' px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border inline-block min-w-20 text-center'">
-                                {{ order.status === 'Concluído' ? 'Entregue' : (order.status === 'Processando' ? 'Enviado' : 'Pendente') }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right font-bold text-gray-900 whitespace-nowrap">
-                            R$ {{ order.amount | number:'1.2-2' }}
-                            <span class="block text-[10px] text-gray-400 font-normal">3 itens</span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="Ver Detalhes">
-                                    <i class="ph-bold ph-eye text-lg"></i>
-                                </button>
-                                <button class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
-                                    <i class="ph-bold ph-pencil-simple text-lg"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                } @empty {
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-gray-400">
-                                <div class="bg-gray-50 p-4 rounded-full mb-3">
-                                    <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
-                                </div>
-                                <p class="text-sm font-medium">Nenhum pedido encontrado.</p>
-                                <p class="text-xs mt-1">Tente ajustar os filtros ou a busca.</p>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    
-    <!-- Paginação -->
-    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/30">
-        <span class="text-xs text-gray-500">Mostrando <strong>1-{{ filteredOrders().length }}</strong> resultados</span>
         <div class="flex items-center gap-2">
-            <button class="p-2 border border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-white disabled:opacity-50 transition-all disabled:cursor-not-allowed" disabled>
-                <i class="ph-bold ph-caret-left"></i>
+            <button class="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-white rounded-xl transition-all cursor-pointer border border-transparent hover:border-gray-200" title="Exportar">
+                <i class="ph-bold ph-download-simple text-xl"></i>
             </button>
-            <button class="p-2 border border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-white transition-all">
-                <i class="ph-bold ph-caret-right"></i>
+            <button class="bg-brand-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-brand-700 transition-all shadow-sm active:scale-[0.98] cursor-pointer">
+                Novo Pedido
             </button>
         </div>
-    </div>
-</div>
+    </header>
+    
+    <!-- Barra de Ferramentas Minimalista -->
+    <section class="flex flex-col md:flex-row gap-4 items-center justify-between px-2">
+        
+        <!-- Pesquisa sem fundo pesado -->
+        <div class="relative w-full md:max-w-sm group">
+            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors"></i>
+            <input type="text" 
+                   [ngModel]="searchTerm()"
+                   (ngModelChange)="searchTerm.set($event)"
+                   placeholder="Pesquisar pedidos..." 
+                   class="w-full pl-10 pr-4 py-2 bg-transparent border-b border-gray-200 focus:border-brand-500 transition-all outline-none text-sm text-gray-700 placeholder:text-gray-400">
+        </div>
+        
+        <!-- Filtros Discretos -->
+        <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide w-full md:w-auto">
+            <button (click)="setFilter('all')" 
+                    [ngClass]="activeFilter() === 'all' ? 'text-brand-600 bg-brand-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap">
+                Todos
+            </button>
+            <button (click)="setFilter('PAGO')" 
+                    [ngClass]="activeFilter() === 'PAGO' ? 'text-green-600 bg-green-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap">
+                Pagos
+            </button>
+            <button (click)="setFilter('PENDENTE')" 
+                    [ngClass]="activeFilter() === 'PENDENTE' ? 'text-amber-600 bg-amber-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'"
+                    class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap">
+                Pendentes
+            </button>
+        </div>
+    </section>
 
+    <!-- Tabela Ultra-limpa -->
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden relative min-h-[400px]">
+        
+        @if (isLoading()) {
+            <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-30 flex items-center justify-center text-brand-600">
+                <i class="ph ph-spinner animate-spin text-3xl"></i>
+            </div>
+        }
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-50 font-bold">
+                        <th class="px-6 py-4">ID</th>
+                        <th class="px-6 py-4">Data</th>
+                        <th class="px-6 py-4">Cliente</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Total</th>
+                        <th class="px-6 py-4 text-center w-20"></th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm divide-y divide-gray-50">
+                    @for (order of filteredOrders(); track order.id) {
+                        <tr class="hover:bg-gray-50/50 transition-colors group">
+                            <td class="px-6 py-5">
+                                <span class="font-mono text-xs font-bold text-gray-900">
+                                    #{{ order.id.substring(0,8) | uppercase }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-5 text-gray-500 text-xs">
+                                {{ order.dataPedido | date:'dd/MM/yy' }}
+                                <span class="text-[10px] opacity-50 ml-1">{{ order.dataPedido | date:'HH:mm' }}</span>
+                            </td>
+
+                            <td class="px-6 py-5">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-semibold text-gray-700">Utilizador</span>
+                                    <span class="text-[10px] font-mono text-gray-400 truncate max-w-[80px]">{{ order.clienteId }}</span>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-4">
+                                    <!-- Status Simplificado em Texto -->
+                                    <span [class]="getPaymentBadgeClass(order.status) + ' px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase'">
+                                        {{ order.status === 'PAGO' ? 'Pago' : 'Pendente' }}
+                                    </span>
+                                    <span [class]="getFulfillmentBadgeClass(order.status) + ' text-[10px] font-bold uppercase hidden sm:inline'">
+                                        @switch (order.status) {
+                                            @case ('ENTREGUE') { Entregue }
+                                            @case ('ENVIADO') { Enviado }
+                                            @default { — }
+                                        }
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-5 text-right">
+                                <span class="font-bold text-gray-900">{{ order.valorTotal | currency:'BRL' }}</span>
+                            </td>
+
+                            <td class="px-6 py-5">
+                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button [routerLink]="['/pedido', order.id]" class="p-1.5 text-gray-400 hover:text-brand-600 transition-colors cursor-pointer">
+                                        <i class="ph-bold ph-eye"></i>
+                                    </button>
+                                    <button class="p-1.5 text-gray-400 hover:text-gray-900 transition-colors cursor-pointer">
+                                        <i class="ph-bold ph-dots-three-vertical"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        @if (!isLoading()) {
+                            <tr>
+                                <td colspan="6" class="px-6 py-24 text-center">
+                                    <p class="text-gray-400 text-sm italic">Nenhum pedido encontrado.</p>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginação Discreta -->
+        <footer class="px-6 py-4 border-t border-gray-50 flex items-center justify-between bg-white gap-4">
+            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                {{ filteredOrders().length }} de {{ totalElements() }} resultados
+            </span>
+            
+            <div class="flex items-center gap-2">
+                <button (click)="changePage(-1)" 
+                        [disabled]="currentPage() === 0 || isLoading()"
+                        class="p-2 text-gray-400 hover:text-gray-900 disabled:opacity-20 transition-all cursor-pointer">
+                    <i class="ph-bold ph-arrow-left"></i>
+                </button>
+                
+                <span class="text-xs font-bold text-gray-900 px-2">{{ currentPage() + 1 }}</span>
+
+                <button (click)="changePage(1)" 
+                        [disabled]="((currentPage() + 1) * pageSize()) >= totalElements() || isLoading()"
+                        class="p-2 text-gray-400 hover:text-gray-900 disabled:opacity-20 transition-all cursor-pointer">
+                    <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
 </div>
