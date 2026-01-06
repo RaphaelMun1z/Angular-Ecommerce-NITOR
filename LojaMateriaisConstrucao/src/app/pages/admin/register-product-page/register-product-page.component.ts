@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Categoria, ProdutoRequest } from '../../../models/catalogo.models';
 import { CatalogoService } from '../../../services/catalogo.service';
+import { TipoMovimentacao, MovimentacaoEstoqueRequest } from '../../../models/estoque.models';
+import { EstoqueService } from '../../../services/estoque.service';
+import { FileUploadService } from '../../../services/fileUpload.service';
 
 @Component({
     selector: 'app-register-product-page',
@@ -16,17 +19,27 @@ import { CatalogoService } from '../../../services/catalogo.service';
 export class RegisterProductPageComponent implements OnInit {
     private fb = inject(FormBuilder);
     private catalogoService = inject(CatalogoService);
+    private estoqueService = inject(EstoqueService);
+    private fileUploadService = inject(FileUploadService);
     private toastr = inject(ToastrService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute); 
     
-    // Estado
+    // Estados reativos
     isLoading = signal(false);
-    images = signal<string[]>([]);
+    isAdjustingStock = signal(false);
+    isUploading = signal(false); // Estado de upload
+    isEditing = signal(false);
+    showStockModal = signal(false);
+    productId = signal<string | null>(null);
     categorias = signal<Categoria[]>([]);
     
-    // Formulário seguindo a interface ProdutoRequest
+    // Lista de URLs das imagens carregadas
+    images = signal<string[]>([]);
+    
+    // Formulário Principal
     productForm: FormGroup = this.fb.group({
-        codigoControle: ['', [Validators.required, Validators.minLength(3)]], // SKU
+        codigoControle: ['', [Validators.required, Validators.minLength(3)]],
         titulo: ['', [Validators.required, Validators.minLength(3)]],
         descricao: ['', [Validators.required]],
         preco: [null, [Validators.required, Validators.min(0.01)]],
@@ -38,27 +51,91 @@ export class RegisterProductPageComponent implements OnInit {
         dimensoes: ['']
     });
     
+    // Formulário de Ajuste de Estoque
+    stockForm: FormGroup = this.fb.group({
+        quantidade: [1, [Validators.required, Validators.min(1)]],
+        tipo: [TipoMovimentacao.ENTRADA, Validators.required],
+        motivo: ['', [Validators.required, Validators.minLength(5)]]
+    });
+    
     ngOnInit() {
         this.carregarCategorias();
+        
+        this.route.queryParams.subscribe(params => {
+            const id = params['id'];
+            if (id) {
+                this.productId.set(id);
+                this.isEditing.set(true);
+                this.carregarDadosProduto(id);
+            }
+        });
     }
     
     carregarCategorias() {
         this.catalogoService.listarCategoriasAtivas({ page: 0, size: 100 }).subscribe({
-            next: (page) => this.categorias.set(page.content),
-            error: () => this.toastr.error('Erro ao carregar categorias.')
+            next: (page) => this.categorias.set(page.content)
         });
     }
     
-    // Upload Simulado (O backend atual ainda não lida com multipart, salvamos apenas os dados)
+    carregarDadosProduto(id: string) {
+        this.isLoading.set(true);
+        this.catalogoService.obterProduto(id).subscribe({
+            next: (produto) => {
+                this.productForm.patchValue({
+                    codigoControle: produto.codigoControle,
+                    titulo: produto.titulo,
+                    descricao: produto.descricao,
+                    preco: produto.preco,
+                    precoPromocional: produto.precoPromocional,
+                    estoque: produto.estoque,
+                    ativo: produto.ativo,
+                    categoriaId: produto.categoria?.id,
+                    pesoKg: produto.pesoKg,
+                    dimensoes: produto.dimensoes
+                });
+                
+                // Carrega as imagens existentes
+                if (produto.imagens && produto.imagens.length > 0) {
+                    this.images.set(produto.imagens);
+                }
+                
+                this.isLoading.set(false);
+            },
+            error: () => {
+                this.toastr.error('Erro ao carregar dados do produto.');
+                this.router.navigate(['/dashboard-admin/produtos']);
+            }
+        });
+    }
+    
+    // --- Lógica de Upload REAL ---
     onFileSelected(event: any) {
-        const files = event.target.files;
-        if (files) {
+        const files: FileList = event.target.files;
+        if (files && files.length > 0) {
+            this.isUploading.set(true);
+            let uploadCount = 0;
+            
             for (let i = 0; i < files.length; i++) {
-                const reader = new FileReader();
-                reader.onload = (e: any) => {
-                    this.images.update(imgs => [...imgs, e.target.result]);
-                };
-                reader.readAsDataURL(files[i]);
+                const file = files[i];
+                
+                this.fileUploadService.upload(file).subscribe({
+                    next: (response) => {
+                        // Adiciona a URL retornada ao signal de imagens
+                        //this.images.update(imgs => [...imgs, response.url]);
+                        uploadCount++;
+                    },
+                    error: () => {
+                        this.toastr.error(`Erro ao enviar a imagem ${file.name}`);
+                        uploadCount++; // Conta como processado mesmo com erro para liberar o loading
+                    },
+                    complete: () => {
+                        // Se todos os arquivos foram processados, encerra o loading
+                        if (uploadCount === files.length) {
+                            this.isUploading.set(false);
+                            this.toastr.success('Imagens enviadas com sucesso!');
+                        }
+                    }
+                });
             }
         }
     }
@@ -67,22 +144,16 @@ export class RegisterProductPageComponent implements OnInit {
         this.images.update(imgs => imgs.filter((_, i) => i !== index));
     }
     
-    isFieldInvalid(fieldName: string): boolean {
-        const field = this.productForm.get(fieldName);
-        return !!(field && field.invalid && (field.dirty || field.touched));
-    }
-    
+    // Salvar Produto com Imagens
     onSubmit() {
         if (this.productForm.invalid) {
             this.productForm.markAllAsTouched();
-            this.toastr.warning('Por favor, preencha todos os campos obrigatórios.');
             return;
         }
         
         this.isLoading.set(true);
         const formValue = this.productForm.value;
         
-        // Mapeia para o DTO esperado pelo Backend
         const request: ProdutoRequest = {
             codigoControle: formValue.codigoControle,
             titulo: formValue.titulo,
@@ -93,19 +164,70 @@ export class RegisterProductPageComponent implements OnInit {
             ativo: formValue.ativo,
             categoriaId: formValue.categoriaId,
             pesoKg: formValue.pesoKg,
-            dimensoes: formValue.dimensoes
+            dimensoes: formValue.dimensoes,
+            imagens: this.images() // Envia as URLs das imagens
         };
         
-        this.catalogoService.salvarProduto(request).subscribe({
-            next: (produto) => {
-                this.toastr.success(`Produto "${produto.titulo}" cadastrado com sucesso!`);
-                this.router.navigate(['/dashboard-admin']);
+        const operation$ = this.isEditing() && this.productId()
+        ? this.catalogoService.atualizarProduto(this.productId()!, request)
+        : this.catalogoService.salvarProduto(request);
+        
+        operation$.subscribe({
+            next: () => {
+                this.toastr.success(`Produto ${this.isEditing() ? 'atualizado' : 'cadastrado'} com sucesso!`);
+                this.router.navigate(['/dashboard-admin/produtos']);
             },
             error: (err) => {
-                const msg = err.error?.message || 'Erro ao salvar o produto.';
-                this.toastr.error(msg, 'Erro');
+                this.toastr.error(err.error?.message || 'Erro ao processar solicitação.');
                 this.isLoading.set(false);
             }
         });
+    }
+    
+    // --- Outros Métodos (Estoque, Getters) mantidos iguais ---
+    
+    openStockModal(product: any) { 
+        // Lógica de modal (pode manter a implementação anterior ou adaptar se o produto vier do load)
+        this.stockForm.reset({ quantidade: 1, tipo: TipoMovimentacao.ENTRADA, motivo: '' });
+        this.showStockModal.set(true);
+    }
+    
+    confirmStockAdjustment() {
+        if (this.stockForm.invalid || !this.productId()) {
+            this.stockForm.markAllAsTouched();
+            return;
+        }
+        
+        this.isAdjustingStock.set(true);
+        const val = this.stockForm.value;
+        const request: MovimentacaoEstoqueRequest = {
+            produtoId: this.productId()!,
+            quantidade: val.quantidade,
+            tipo: val.tipo,
+            motivo: val.motivo
+        };
+        
+        this.estoqueService.registrarMovimentacao(request).subscribe({
+            next: () => {
+                this.toastr.success('Estoque atualizado com sucesso!');
+                this.stockForm.reset({ quantidade: 1, tipo: TipoMovimentacao.ENTRADA, motivo: '' });
+                this.showStockModal.set(false);
+                this.carregarDadosProduto(this.productId()!);
+            },
+            error: (err) => this.toastr.error(err.error?.message || 'Erro ao ajustar estoque.'),
+            complete: () => this.isAdjustingStock.set(false)
+        });
+    }
+    
+    get enumTipo() { return TipoMovimentacao; }
+    
+    isFieldInvalid(fieldName: string): boolean {
+        const field = this.productForm.get(fieldName);
+        return !!(field && field.invalid && (field.dirty || field.touched));
+    }
+    
+    isStockFieldInvalid(fieldName: string): boolean {
+        const field = this.stockForm.get(fieldName);
+        return !!(field && field.invalid && (field.dirty || field.touched));
     }
 }

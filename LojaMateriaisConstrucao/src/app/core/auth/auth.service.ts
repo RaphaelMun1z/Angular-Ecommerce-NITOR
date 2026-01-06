@@ -13,8 +13,6 @@ export class AuthService {
     private router = inject(Router);
     private apiUrl = `${environment.apiUrl}/auth`;
     
-    // --- ESTADO (Signals) ---
-    
     private _accessToken = signal<string | null>(localStorage.getItem('access_token'));
     public accessToken = this._accessToken.asReadonly();
     
@@ -23,9 +21,6 @@ export class AuthService {
     
     public isAuthenticated = computed(() => !!this._accessToken());
     
-    // --- COMPUTES DE PERMISSÃO (Novos) ---
-    
-    // Verifica se é Admin
     public isAdmin = computed(() => this.hasRole('ROLE_ADMIN'));
     
     constructor() {
@@ -35,28 +30,30 @@ export class AuthService {
         }
     }
     
-    // --- MÉTODOS DE VERIFICAÇÃO (Novos) ---
+    // --- NOVO MÉTODO: Atualiza o estado local do usuário sem relogar ---
+    updateUser(updates: Partial<User>) {
+        this.user.update(current => {
+            if (!current) return null;
+            return { ...current, ...updates };
+        });
+    }
     
-    /**
-    * Verifica se o usuário tem uma Role ou Permissão específica.
-    * Ex: hasRole('ROLE_ADMIN') ou hasRole('PRODUTO_INSERIR')
-    */
+    // Acesso direto ao signal (atalho)
+    private get user() { return this._currentUser; }
+    
+    // ... (restante dos métodos hasRole, hasAnyRole mantidos) ...
     hasRole(roleOrPermission: string): boolean {
         const user = this._currentUser();
-        // O backend envia tudo (Roles e Permissions) dentro do array 'roles' do JWT
         return user?.roles?.includes(roleOrPermission) ?? false;
     }
     
-    /**
-    * Verifica se o usuário tem pelo menos uma das roles passadas.
-    */
     hasAnyRole(roles: string[]): boolean {
         const user = this._currentUser();
         if (!user || !user.roles) return false;
         return roles.some(role => user.roles!.includes(role));
     }
     
-    // --- AÇÕES (Mantidas iguais) ---
+    // ... (Login, Register, Logout mantidos iguais) ...
     
     login(credentials: LoginRequest): Observable<boolean> {
         return this.http.post<TokenResponse>(`${this.apiUrl}/signin`, credentials).pipe(
@@ -94,8 +91,6 @@ export class AuthService {
         this.logout();
     }
     
-    // --- MÉTODOS PRIVADOS ---
-    
     private handleAuthSuccess(response: TokenResponse) {
         localStorage.setItem('access_token', response.accessToken);
         localStorage.setItem('refresh_token', response.refreshToken);
@@ -109,10 +104,15 @@ export class AuthService {
         try {
             const payload = this.parseJwt(token);
             
+            // Tenta recuperar avatar salvo localmente se o token não tiver (opcional)
+            // ou espera que o componente Profile faça um 'fetch' dos dados atualizados.
+            
             const user: User = {
                 id: payload.id,
                 email: payload.sub,
-                roles: Array.isArray(payload.roles) ? payload.roles : [] 
+                roles: Array.isArray(payload.roles) ? payload.roles : [],
+                // Se o backend enviar 'avatar' no token futuramente, mapear aqui
+                avatar: payload.avatar 
             };
             
             this._currentUser.set(user);

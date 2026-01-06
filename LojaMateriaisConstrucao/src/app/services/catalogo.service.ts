@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Page, PageableParams } from '../models/shared.models';
-import { Produto, ProdutoFiltro, Categoria, ProdutoRequest, CategoriaRequest } from '../models/catalogo.models';
+import { Produto, ProdutoFiltro, Categoria, ProdutoRequest } from '../models/catalogo.models';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({

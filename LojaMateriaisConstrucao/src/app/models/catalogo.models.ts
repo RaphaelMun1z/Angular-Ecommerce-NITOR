@@ -32,6 +32,7 @@ export interface Produto {
     pesoKg?: number;
     dimensoes?: string;
     categoria?: Categoria;
+    imagens: string[]; // ADICIONADO: Lista de URLs
 }
 
 export interface ProdutoRequest {
@@ -45,6 +46,7 @@ export interface ProdutoRequest {
     pesoKg?: number;
     dimensoes?: string;
     categoriaId: string;
+    imagens: string[]; // ADICIONADO: Lista de URLs para envio
 }
 
 // --- FILTROS ---

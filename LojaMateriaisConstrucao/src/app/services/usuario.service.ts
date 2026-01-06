@@ -16,11 +16,15 @@ export class UsuarioService {
     private _enderecos = signal<Endereco[]>([]);
     public enderecos = this._enderecos.asReadonly();
     
-    // --- GESTÃO DE CLIENTES (ADMIN) ---
+    atualizarFoto(userId: string, fileName: string): Observable<any> {
+        const url = `${this.apiUrl}/clientes/${userId}/avatar`;
+        
+        return this.http.patch(url, null, {
+            params: { fileName }
+        });
+    }
     
-    /**
-    * Lista todos os clientes cadastrados no sistema (Paginado)
-    */
+    // --- GESTÃO DE CLIENTES (ADMIN) ---
     listarTodosClientes(pageable?: PageableParams): Observable<Page<Cliente>> {
         let params = new HttpParams();
         if (pageable?.page !== undefined) params = params.set('page', pageable.page);
@@ -33,7 +37,8 @@ export class UsuarioService {
     // --- GESTÃO DE ENDEREÇOS ---
     
     listarEnderecos(clienteId: string): Observable<Endereco[]> {
-        return this.http.get<Endereco[]>(`${this.apiUrl}/cliente/${clienteId}`).pipe(
+        // CORREÇÃO: Ajustado para '/enderecos/cliente/' para seguir o padrão do Postman e do método abaixo
+        return this.http.get<Endereco[]>(`${this.apiUrl}/enderecos/cliente/${clienteId}`).pipe(
             tap(lista => this._enderecos.set(lista))
         );
     }
