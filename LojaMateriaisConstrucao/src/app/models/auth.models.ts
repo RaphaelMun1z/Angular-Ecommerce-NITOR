@@ -24,9 +24,9 @@ export interface User {
     id: string;
     email: string;
     name?: string; 
+    avatar?: string;
     cpf?: string;
     phone?: string;
-    avatar?: string;
     sub?: string;
     roles?: string[];
 }

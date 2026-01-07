@@ -28,7 +28,7 @@ export class UsuarioService {
         });
     }
     
-    atualizarMeusDados(dados: { nome: string; telefone: string }): Observable<void> {
+    atualizarMeusDados(dados: { nome: string; telefone: string; cpf: string }): Observable<void> {
         return this.http.patch<void>(`${this.apiUrl}/clientes/me`, dados);
     }
     

@@ -22,58 +22,46 @@ export class MyPersonalDataComponent implements OnInit {
     isUploading = signal(false);
     isSaving = signal(false);
     
-    // Objeto para bind do formulário (editável)
+    // Objeto para bind do formulário [(ngModel)]
     formData = {
         nome: '',
-        telefone: ''
+        telefone: '',
+        cpf: ''
     };
     
-    // Signal para exibição (read-only e dados protegidos)
+    // Signal para visualização e controle de UI (isCliente)
     user = signal({
-        name: '',
         email: '',
-        cpf: '',
-        phone: '',
-        avatar: ''
+        avatar: '',
+        isCliente: false
     });
     
     constructor() {
-        const currentUser = this.authService.currentUser();
-        if (currentUser) {
-            this.atualizarEstadoLocal(currentUser);
-        }
+        // Reage a qualquer mudança no utilizador global (AuthService)
+        effect(() => {
+            const currentUser = this.authService.currentUser();
+            if (currentUser) {
+                const isCliente = currentUser.roles ? currentUser.roles.includes('ROLE_CLIENTE') : false;
+                
+                // 1. Atualiza dados de exibição
+                this.user.set({
+                    email: currentUser.email,
+                    avatar: currentUser.avatar || `https://ui-avatars.com/api/?name=${currentUser.email}&background=0D8ABC&color=fff`,
+                    isCliente: isCliente
+                });
+                
+                // 2. Sincroniza os inputs do formulário
+                // Usamos as propriedades do seu modelo User (phone e cpf)
+                this.formData.nome = currentUser.name || '';
+                this.formData.telefone = currentUser.phone || '';
+                this.formData.cpf = currentUser.cpf || '';
+            }
+        });
     }
     
     ngOnInit() {
-        this.usuarioService.getMe().subscribe({
-            next: (dadosAtualizados) => {
-                if (dadosAtualizados.avatar && !dadosAtualizados.avatar.startsWith('http')) {
-                    dadosAtualizados.avatar = this.fileUploadService.getPreviewUrl(dadosAtualizados.avatar);
-                }
-                this.authService.updateUser(dadosAtualizados);
-                this.atualizarEstadoLocal(dadosAtualizados);
-            },
-            error: (err) => console.error('Erro ao sincronizar perfil:', err)
-        });
-    }
-    
-    private atualizarEstadoLocal(dados: any) {
-        const defaultAvatar = `https://ui-avatars.com/api/?name=${dados.email}&background=0D8ABC&color=fff&size=128`;
-        
-        // Atualiza o signal de visualização
-        this.user.set({
-            name: dados.nome || dados.name || dados.email?.split('@')[0],
-            email: dados.email || '',
-            cpf: dados.cpf || '',
-            phone: dados.telefone || dados.phone || '',
-            avatar: dados.avatar || defaultAvatar
-        });
-        
-        // Atualiza os inputs do formulário
-        this.formData = {
-            nome: dados.nome || '',
-            telefone: dados.telefone || ''
-        };
+        // Garante que temos os dados mais frescos ao abrir a aba
+        this.authService.refreshUserData();
     }
     
     savePersonalData(event: Event) {
@@ -86,66 +74,54 @@ export class MyPersonalDataComponent implements OnInit {
         
         this.isSaving.set(true);
         
-        this.usuarioService.atualizarMeusDados(this.formData).subscribe({
+        // Prepara o payload para o UsuarioService.atualizarMeusDados
+        // Removemos formatação de máscara para salvar apenas números se o backend exigir
+        const payload = {
+            nome: this.formData.nome,
+            telefone: this.formData.telefone ? this.formData.telefone.replace(/\D/g, '') : '',
+            cpf: this.formData.cpf ? this.formData.cpf.replace(/\D/g, '') : ''
+        };
+        
+        this.usuarioService.atualizarMeusDados(payload).subscribe({
             next: () => {
                 this.toastr.success('Dados atualizados com sucesso!');
                 this.isSaving.set(false);
-                
-                // Atualiza o estado global para refletir o novo nome imediatamente
-                const updatedUser = { ...this.authService.currentUser(), name: this.formData.nome };
-                this.authService.updateUser(updatedUser);
-                
-                // Recarrega dados completos para garantir sincronia
-                this.ngOnInit();
+                // Solicita ao AuthService para buscar os dados novamente e disparar o effect de sincronia
+                this.authService.refreshUserData();
             },
             error: (err) => {
-                this.toastr.error('Erro ao salvar alterações.');
+                this.toastr.error(err.error?.message || 'Erro ao salvar alterações.');
                 this.isSaving.set(false);
-                console.error(err);
             }
         });
     }
     
-    // --- Lógica de Upload (Mantida igual) ---
+    // --- Upload de Foto ---
     onAvatarSelected(event: any) {
         const file: File = event.target.files[0];
-        if (!file) return;
-        
-        if (!file.type.startsWith('image/')) {
-            this.toastr.warning('Formato inválido.');
-            return;
-        }
+        if (!file || !file.type.startsWith('image/')) return;
         
         this.isUploading.set(true);
-        
         this.fileUploadService.upload(file).subscribe({
-            next: (httpEvent: any) => {
-                if (httpEvent instanceof HttpResponse) {
-                    const uploadedFileName = httpEvent.body.fileName;
-                    this.usuarioService.atualizarMeuAvatar(uploadedFileName).subscribe({
+            next: (response: any) => {
+                const body = response instanceof HttpResponse ? response.body : response;
+                if (body && body.fileName) {
+                    this.usuarioService.atualizarMeuAvatar(body.fileName).subscribe({
                         next: () => {
-                            const newAvatarUrl = this.fileUploadService.getPreviewUrl(uploadedFileName);
-                            this.authService.updateUser({ avatar: newAvatarUrl });
-                            this.user.update(u => ({ ...u, avatar: newAvatarUrl }));
-                            this.toastr.success('Foto atualizada!');
+                            const newUrl = body.url;
+                            this.authService.updateUser({ avatar: newUrl });
+                            this.toastr.success('Foto de perfil atualizada!');
                             this.isUploading.set(false);
                         },
-                        error: () => {
-                            this.toastr.error('Erro ao salvar foto.');
-                            this.isUploading.set(false);
-                        }
+                        error: () => this.isUploading.set(false)
                     });
                 }
             },
-            error: () => {
-                this.toastr.error('Falha no upload.');
-                this.isUploading.set(false);
-            }
+            error: () => this.isUploading.set(false)
         });
     }
     
     handleImageError(event: any) {
-        const email = this.user().email;
-        event.target.src = `https://ui-avatars.com/api/?name=${email}&background=0D8ABC&color=fff&size=128`;
+        event.target.src = `https://ui-avatars.com/api/?name=${this.user().email}&background=0D8ABC&color=fff`;
     }
 }

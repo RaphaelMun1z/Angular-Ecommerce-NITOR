@@ -51,7 +51,9 @@ export class AuthService {
                 this.updateUser({
                     name: dadosBanco.nome,      
                     email: dadosBanco.email,
-                    avatar: dadosBanco.fotoUrl  
+                    avatar: dadosBanco.fotoUrl,
+                    cpf: dadosBanco.cpf,
+                    phone: dadosBanco.telefone 
                 });
             },
             // Ignora erros silenciosamente (ex: token expirou durante o refresh)
