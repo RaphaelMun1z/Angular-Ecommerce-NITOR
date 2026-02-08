@@ -200,3 +200,7 @@ Passos para contribuir:
 ---
 
 Desenvolvido por **Raphael Muniz**
+
+---
+
+cloudflared tunnel --url http://localhost:8080
