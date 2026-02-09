@@ -3,9 +3,9 @@ export interface Stat {
     label: string;
 }
 
-export interface Value {
+export interface ValuePillar {
     icon: string;
     title: string;
     description: string;
-    colorClass: string;
+    colorClass: string; 
 }

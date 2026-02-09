@@ -11,5 +11,5 @@ import { FooterComponent } from "./shared/components/layout/footer/footer.compon
 })
 
 export class AppComponent {
-    title = 'LojaMateriaisConstrucao';
+    title = 'NITOR | O ponto de partida para o que você precisa';
 }

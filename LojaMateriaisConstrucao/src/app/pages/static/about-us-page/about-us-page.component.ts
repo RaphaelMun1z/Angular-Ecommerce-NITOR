@@ -1,40 +1,43 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
-import { Stat, Value } from '../../../shared/interfaces/AboutUs';
+import { Stat, ValuePillar } from '../../../shared/interfaces/AboutUs';
 
 @Component({
     selector: 'app-about-us-page',
     imports: [CommonModule],
     templateUrl: './about-us-page.component.html',
-    styleUrl: './about-us-page.component.css'
+    styleUrl: './about-us-page.component.css',
 })
-
 export class AboutUsPageComponent {
     stats = signal<Stat[]>([
-        { value: '50k+', label: 'Clientes Atendidos' },
-        { value: '15k+', label: 'Produtos no Catálogo' },
-        { value: '24h', label: 'Envio Expresso' },
-        { value: '4.9', label: 'Nota Média (Reviews)' }
+        { value: '+5.000', label: 'Clientes Satisfeitos' },
+        { value: 'Nacional', label: 'Entrega Garantida' },
+        { value: '24/7', label: 'Suporte Online' },
+        { value: 'Premium', label: 'Curadoria de Itens' },
     ]);
-    
-    values = signal<Value[]>([
-        { 
-            icon: 'ph-shield-check', 
-            title: 'Confiança Absoluta', 
-            description: 'Trabalhamos apenas com marcas certificadas e garantimos a procedência e qualidade de cada item vendido em nossa loja.',
-            colorClass: 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+
+    values = signal<ValuePillar[]>([
+        {
+            icon: 'ph-magnifying-glass',
+            title: 'Seleção Rigorosa',
+            description:
+                'Nosso esforço (Nitor) está na curadoria. Analisamos centenas de opções para trazer apenas o que une funcionalidade real e design duradouro.',
+            colorClass: 'bg-blue-100 group-hover:bg-blue-600 text-blue-600',
         },
-        { 
-            icon: 'ph-truck', 
-            title: 'Logística Ágil', 
-            description: 'Sabemos que obra parada é prejuízo. Nossa logística é otimizada com centros de distribuição estratégicos para entregas recordes.',
-            colorClass: 'bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white'
+        {
+            icon: 'ph-squares-four',
+            title: 'Variedade Inteligente',
+            description:
+                'Não se trata de ter tudo, mas de ter o necessário. De soluções para casa a gadgets modernos, focamos na utilidade para o seu dia a dia.',
+            colorClass:
+                'bg-orange-100 group-hover:bg-orange-600 text-orange-600',
         },
-        { 
-            icon: 'ph-users-three', 
-            title: 'Parceria Técnica', 
-            description: 'Nosso suporte não é apenas comercial. Falamos a língua da engenharia para ajudar você a escolher a especificação correta.',
-            colorClass: 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white'
-        }
+        {
+            icon: 'ph-sparkle',
+            title: 'Experiência Premium',
+            description:
+                'O brilho do resultado. Garantimos uma jornada de compra fluida, envio cuidadoso e a certeza de adquirir um produto que faz a diferença.',
+            colorClass: 'bg-brand-100 group-hover:bg-brand-600 text-brand-600',
+        },
     ]);
 }

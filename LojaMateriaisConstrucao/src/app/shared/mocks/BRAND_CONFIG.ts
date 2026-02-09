@@ -1,10 +1,9 @@
 export const BRAND_CONFIG = {
-    namePrefix: 'Constru',
-    nameSuffix: 'Monte',
+    namePrefix: 'NITOR',
+    nameSuffix: '',
     
     useImage: true,
-    logoUrl: 'construmonte-logo.png', 
+    logoUrl: 'logo.png', 
     iconClass: 'ph-bold ph-hammer',
-    
     homeUrl: '/'
 };
