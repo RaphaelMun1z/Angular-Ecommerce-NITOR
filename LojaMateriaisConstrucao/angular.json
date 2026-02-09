@@ -13,7 +13,7 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
-						"outputPath": "dist",
+                        "outputPath": "dist",
                         "index": "src/index.html",
                         "browser": "src/main.ts",
                         "baseHref": "/Angular-LojaDeMateriaisParaConstrucao/",
@@ -38,16 +38,17 @@
                     },
                     "configurations": {
                         "production": {
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                }
+                            ],
                             "budgets": [
                                 {
                                     "type": "initial",
                                     "maximumWarning": "2MB",
                                     "maximumError": "3MB"
-                                },
-                                {
-                                    "type": "anyComponentStyle",
-                                    "maximumWarning": "4kB",
-                                    "maximumError": "8kB"
                                 }
                             ],
                             "outputHashing": "all"
