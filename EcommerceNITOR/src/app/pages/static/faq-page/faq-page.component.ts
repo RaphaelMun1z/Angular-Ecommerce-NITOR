@@ -34,7 +34,7 @@ export class FaqPageComponent {
         },
         {
             question: 'Entregam em todo o Brasil?',
-            answer: 'Sim, realizamos entregas em todo o território nacional através de transportadoras parceiras e Correios, garantindo que seu material chegue em qualquer obra.'
+            answer: 'Sim, realizamos entregas em todo o território nacional através de transportadoras parceiras e Correios.'
         }
     ];
     
