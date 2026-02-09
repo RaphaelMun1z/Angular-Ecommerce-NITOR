@@ -26,7 +26,7 @@ Uma plataforma full-stack que une design limpo, alta performance e uma experiên
 
 O projeto está implantado e acessível online para testes.
 
-👉 **Acesse aqui:** [https://spring-ecommerce-xix0.onrender.com/api/swagger-ui/index.html](https://spring-ecommerce-xix0.onrender.com/api/swagger-ui/index.html)
+👉 **Acesse aqui:** [https://raphaelmun1z.github.io/Angular-Ecommerce-NITOR/inicio](https://raphaelmun1z.github.io/Angular-Ecommerce-NITOR/inicio)
 
 ---
 
